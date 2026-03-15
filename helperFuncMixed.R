@@ -272,7 +272,7 @@ EM_beta_given_tau_mixed = function(data, beta, tau, discCols, reps){
     beta_list[[rep+1]] = beta
     #print(summary(beta[beta != 0]))
     diff = beta - beta_list[[rep]]
-    print(paste0("beta RMSE from previous iter: ",sqrt(mean(diff[diff != 0]^2))))
+    #print(paste0("beta RMSE from previous iter: ",sqrt(mean(diff[diff != 0]^2))))
     diffs_list[[rep]] = sqrt(mean(diff[diff != 0]^2))
   }
   return(list(beta, diffs_list))
@@ -391,7 +391,7 @@ EM_tau_beta_mixed = function(data, parent_set, discColumns, reps){
   store_likelihood = matrix(data = 0, nrow = reps+1, ncol = p)
   ##############################################
   for(i in 1:reps){
-    print(i)
+    #print(i)
     # update beta given tau
     # From here Feb 1 5pm
     update_beta = EM_beta_given_tau_mixed(data, init_beta, init_tau, discCols = discColumns, reps = 5)
@@ -473,15 +473,12 @@ Sig_Estimate_DAG_mixed = function(X, trunc_vals, block_sizes, discCols){
   
   avg_corr = matrix(data = 0, nrow = max(block_sizes), ncol = max(block_sizes)) # dont know if I need or not
   for(j in 1:cluster_number){
-    print(j)
+    #print(j)
     if(block_sizes[j] == 1){
       next
     }
     num_pairs = t(combn(1:block_sizes[j], 2))
     indices = (sum(block_sizes[-(j:cluster_number)]))
-    if(j %% 5 == 0){
-      print(paste0("On to cluster, ", j))
-    }
     for(i in 1:nrow(num_pairs)){
       col1 = indices+num_pairs[i,1]
       col2 = indices+num_pairs[i,2]
@@ -526,7 +523,7 @@ beta_est_loop = function(data, init_beta, init_epsilon ,block_sizes, loops, true
   update_betas = list()
   for(i in 1:loops){
     trunc_vals = obtain_trunc_vals(data, update_beta)
-    print(summary(c(update_beta)))
+    #print(summary(c(update_beta)))
     if(i == 2){
       estimated_Sigma = Sig_Estimate_DAG(X = data, trunc_vals = trunc_vals, block_sizes = block_sizes)
       if(is.positive.definite(estimated_Sigma) == F){
@@ -546,10 +543,6 @@ beta_est_loop = function(data, init_beta, init_epsilon ,block_sizes, loops, true
       estimated_Sigma = diag(nrow = nrow(data))
       L_hat = chol(estimated_Sigma)
     }
-    if(i %% 5 == 0){
-      print(i)
-    }
-    
     eps_draw = withTimeout({
       epsilon_draw(Sigma_hat = estimated_Sigma, data = data, trunc_vals = trunc_vals, block_sizes = block_sizes, prev_iter = eps_draw, iter_num = i)
     }, timeout=600, onTimeout="silent")
@@ -569,7 +562,7 @@ beta_est_loop = function(data, init_beta, init_epsilon ,block_sizes, loops, true
     start = Sys.time()
     new_beta_vals = new_beta(uncor_Z = uncor_data, LX = LX, init_beta = update_beta)
     end = Sys.time()
-    print(paste0("new beta step: ", end - start))
+    # print(paste0("new beta step: ", end - start))
     update_betas[[i]] = new_beta_vals[[1]]
     btw_betas[i] = sqrt(mean(c(update_beta - new_beta_vals[[1]])^2))
     update_beta = new_beta_vals[[1]]
@@ -632,7 +625,7 @@ beta_est_loop_mixed = function(data, init_beta, init_epsilon ,block_sizes, loops
   
   for(j in 1:20){
     
-    print(j)
+    #print(j)
     eps_draw = withTimeout({
       epsilon_draw_mixed(Sigma_hat = estimated_Sigma, data = data, trunc_vals = trunc_vals, block_sizes = block_sizes, prev_iter = eps_draw, iter_num = j, discCols = discColumns)
     }, timeout=600, onTimeout="silent")
@@ -693,7 +686,7 @@ beta_est_loop_input_covariance_mixed = function(data, adj_mat, cov_est, init_eps
     start = Sys.time()
     new_beta_vals = new_beta(uncor_Z = uncor_data, LX = LX, init_beta = adj_mat)
     end = Sys.time()
-    print(paste0("new beta step: ", end - start))
+    #print(paste0("new beta step: ", end - start))
     #summary(c(update_beta))
     update_beta = new_beta_vals[[1]]
   }
@@ -972,9 +965,6 @@ beta_est_loop_multi = function(data, init_beta, init_epsilon ,block_sizes, loops
       estimated_Sigma = diag(nrow = nrow(data))
       L_hat = chol(estimated_Sigma)
     }
-    if(i %% 5 == 0){
-      print(i)
-    }
     
     # Cholesky decomposition of Theta = inverse(Sigma) such that L_hat %*% Sigma %*% t(L_hat) = I_n
     eps_draw = withTimeout({
@@ -1000,7 +990,7 @@ beta_est_loop_multi = function(data, init_beta, init_epsilon ,block_sizes, loops
     start = Sys.time()
     new_beta_vals = new_beta(uncor_Z = uncor_data, LX = LX, init_beta = update_beta)
     end = Sys.time()
-    print(paste0("new beta step: ", end - start))
+    #print(paste0("new beta step: ", end - start))
     update_betas[[i]] = new_beta_vals[[1]]
     btw_betas[i] = sqrt(mean(c(update_beta - new_beta_vals[[1]])^2))
     update_beta = new_beta_vals[[1]]
