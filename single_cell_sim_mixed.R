@@ -1,8 +1,4 @@
 source("helperFuncMixed.R")
-# load("single_cell_multicategorical_5_2025/othergenes.RData")
-# load("single_cell_multicategorical_5_2025/block_sizes_alldata.RData")
-# load("single_cell_multicategorical_5_2025/tot_sample_alldata.RData")
-# load("single_cell_multicategorical_5_2025/allData_df_mixed.RData")
 source("libraries.R")
 source("helperFunc.R")
 source("single_cell_funcs.R")
@@ -252,9 +248,6 @@ CV_likelihood_all = function(data, block_sizes, bgr_Estimated_Sigma, group_sizes
   likelihood_folds_init_2 = rep(0,10)
   likelihood_folds_concensus_2 = rep(0, 10)
   likelihood_folds_concensus_nocov_2 = rep(0, 10)
-  #likelihood_folds_complete_nocov = rep(0, length(block_sizes))
-  #likelihood_folds_complete_cov = rep(0, length(block_sizes))
-  
   for(cluster_number in 10:length(group_sizes)){
     print(cluster_number)
     init_index = (sum(group_sizes[0:(cluster_number-1)]))+1
@@ -429,196 +422,57 @@ final_cpdag_edgecount = final_cpdag
 final_cpdag_edgecount[final_cpdag_edgecount == 1] = 0
 final_cpdag_edgecount = final_cpdag_edgecount + edge_count
 save(final_cpdag_edgecount, file = "single_cell_multicategorical_5_2025/single_cell_mixed_conf_edges/alledges.RData")
-# adjMat should be a square matrix with rownames and colnames
-
-# Get indices of edges present in the final_cpdag
-edge_indices <- which(final_cpdag == 1, arr.ind = TRUE)
-
-# Create a data frame with edges and their counts
-edge_counts_df <- data.frame(
-  from = rownames(final_cpdag)[edge_indices[, 1]],
-  to   = colnames(final_cpdag)[edge_indices[, 2]],
-  count = final_cpdag_edgecount[edge_indices]
-)
-
-# Preview the result
-print(edge_counts_df)
-
-# Make a new column that defines an edge key in both directions
-edge_counts_df$pair <- paste(edge_counts_df$from, edge_counts_df$to, sep = "_")
-reverse_pairs <- paste(edge_counts_df$to, edge_counts_df$from, sep = "_")
-
-# Check if the reverse pair exists
-edge_counts_df$type <- ifelse(reverse_pairs %in% edge_counts_df$pair, "undirected", "directed")
-
-# Remove duplicate undirected edges (keep only one direction)
-# edge_counts_df_unique <- edge_counts_df[!(edge_counts_df$type == "undirected" & edge_counts_df$from > edge_counts_df$to), ]
-
-# Split into directed and undirected
-directed <- subset(edge_counts_df, type == "directed")
-undirected <- subset(edge_counts_df, type == "undirected")
-
-# View result
-print("Directed edges:")
-print(directed)
-
-print("Undirected edges:")
-print(undirected)
-
-write.csv(undirected, file = "single_cell_multicategorical_5_2025/single_cell_mixed_conf_edges/undirected_final_cpdag_conf.csv")
-
-get_edge_lists <- function(adjMat) {
-  adjMat <- as.matrix(adjMat)
-  
-  # All edges
-  edges <- which(adjMat == 1, arr.ind = TRUE)
-  edge_list <- data.frame(
-    Parent = rownames(adjMat)[edges[, 1]],
-    Child  = colnames(adjMat)[edges[, 2]],
-    stringsAsFactors = FALSE
-  )
-  
-  # Check which edges are reciprocated
-  is_undirected <- mapply(function(p, c) adjMat[c, p] == 1, 
-                          edge_list$Parent, edge_list$Child)
-  
-  # Undirected edges (keep each pair only once)
-  undirected <- edge_list[is_undirected, ]
-  if (nrow(undirected) > 0) {
-    # Order pairs so A-B and B-A collapse to one
-    undirected <- undirected[!duplicated(t(apply(undirected, 1, sort))), ]
-  }
-  
-  # Directed edges (not reciprocated)
-  directed <- edge_list[!is_undirected, ]
-  
-  return(list(
-    Directed = directed,
-    Undirected = undirected
-  ))
-}
-
-edgeList_df = get_edge_lists(final_cpdag)
-save(edgeList_df, file = "single_cell_multicategorical_5_2025/alldata_cpdag_edgelist.RData")
-
-directed = edgeList_df$Directed
-undirected = edgeList_df$Undirected
-
-write.csv(weighted_edge_list, file = "single_cell_multicategorical_5_2025/confidence_edges.csv")
-
-#######  Importing data for bootstrap ########
-
-source("libraries.R")
-source("helperFunc.R")
-source("single_cell_funcs.R")
-library(dplyr)
-targetgene <- readRDS("single_cell_data/sig_genes_log_val.rds")
-sig_genes_log_val <- readRDS("single_cell_data/sig_genes_log_val_full.rds")
-idx_goodgene <- apply(sig_genes_log_val, 1, function(x) sd(x)/abs(mean(x)) > 0.25) %>% which()
-goodgene <- sig_genes_log_val[idx_goodgene,]
-goodgene %>% dim()
-set.seed(12)
-othergenes <- sample_n(as.data.frame(goodgene[1:7000,]), 2000) %>% as.matrix() %>% t()
-# use 2000 genes to cluster the 1018 cells
-
-
-# default clustering ------------------------------------------------------
-sc_block_idx_full <- readRDS("single_cell_data/single_cell_block_idx_full.rds")
-for(i in 1:length(sc_block_idx_full)){
-  names(sc_block_idx_full[[i]]) <- colnames(targetgene)[sc_block_idx_full[[i]]]
-}
-# Xp <- readRDS(file = "data/single_cell_data/sig_genes_log_val.rds")
-Xp <- t(targetgene)
-Xp %>% dim()
-# randomly sample 20 cells from each cell type and merge the indices
-
-full_log_vals = Xp
-
-# targetgene will be the 51 genes and othergenes are the background genes
-# # clustering --------------------------------------------------------------
-
-B = 10
-frac <- 0.5
-n = dim(full_log_vals)[1]
-for(i in 1:B){
-  idx <- sample(1:n, size = floor(frac*n), replace = FALSE)
-  othergenes_samp = othergenes[idx,]
-  targetgene_samp = targetgene[idx,]
-  # clustering
-  d <- dist(scale(othergenes), method = "euclidean")
-  hc1 <- hclust(d, method = "complete")
-  # getting sample
-  sub_grp <- cutree(hc1, k=100)
-  clusters <- sub_grp[!grepl("^HFF", names(sub_grp))]
-  uniq_clusters = unique(clusters)
-  
-  # get total sample and put into tot_sample and get blocksizes
-  tot_sample = c()
-  block_sizes = c()
-  for(i in uniq_clusters){
-    cluster_sub_grp = sub_grp[which(sub_grp == i)]
-    cluster_size = length(cluster_sub_grp)
-    # cluster_sample = sample(cluster_sub_grp, cluster_size)
-    block_sizes = c(block_sizes, cluster_size)
-    tot_sample = c(tot_sample, cluster_sub_grp)
-  }
-  
-  
-  
-}
-
-
 
 ####### Plotting graph of estimated GRN #########
-g = graph_from_data_frame(all_edges)
-deg <- degree(g, mode = "all")  # or mode="in"/"out" if you prefer
-
-ord <- order(deg, decreasing = TRUE)
-ord[1] = 11
-ord[26] = 17
-# 11 <-> 17
-# 34 <-> 8
-ord[17] = 8
-ord[23] = 34
-# 6 <-> 14
-ord[21] = 14
-ord[29] = 6
-# 28 <-> 37
-g = permute(g, ord)
-
-library(igraph)
-E(g)$type <- all_edges$type
-lay <- layout_in_circle(g) 
-E(g)$color <- "black" 
-E(g)$width <- 1 
-E(g)$arrow.size <- ifelse(E(g)$type == "undirected", 0, 0.2)
-V(g)$size <- 3
-V(g)$color <- "black" 
-V(g)$frame.color <- NA 
-n <- vcount(g) 
-angle <- 360 * (seq_len(n) - 1) / n 
-V(g)$label.degree <- angle * pi / 180 
-V(g)$label.dist <- 1.75 
-V(g)$label.cex <- .75
-arrow_sizes <- ifelse(E(g)$type == "undirected", 0, 0.2)
-plot(g, 
-     layout = lay, 
-     vertex.label = V(g)$name, 
-     vertex.label.color = "black",
-     edge.color = ifelse(E(g)$type == "directed", "black", NA),
-     edge.width = E(g)$width,
-     edge.arrow.size = 1,
-     asp = 1, margin = -.1, 
-     vertex.label.degree=lab.locs)
-
-undirected_edges <- E(g)[E(g)$type == "undirected"]
-for(e in undirected_edges) {
-  from <- ends(g, e)[1]
-  to   <- ends(g, e)[2]
-  segments(
-    lay[which(V(g)$name == from), 1], lay[which(V(g)$name == from), 2],
-    lay[which(V(g)$name == to), 1],   lay[which(V(g)$name == to), 2],
-    col = "DodgerBlue", lwd = 1
-  )
-}
-title("Estimated Single-cell GRN")
+# g = graph_from_data_frame(all_edges)
+# deg <- degree(g, mode = "all")  # or mode="in"/"out" if you prefer
+# 
+# ord <- order(deg, decreasing = TRUE)
+# ord[1] = 11
+# ord[26] = 17
+# # 11 <-> 17
+# # 34 <-> 8
+# ord[17] = 8
+# ord[23] = 34
+# # 6 <-> 14
+# ord[21] = 14
+# ord[29] = 6
+# # 28 <-> 37
+# g = permute(g, ord)
+# 
+# library(igraph)
+# E(g)$type <- all_edges$type
+# lay <- layout_in_circle(g) 
+# E(g)$color <- "black" 
+# E(g)$width <- 1 
+# E(g)$arrow.size <- ifelse(E(g)$type == "undirected", 0, 0.2)
+# V(g)$size <- 3
+# V(g)$color <- "black" 
+# V(g)$frame.color <- NA 
+# n <- vcount(g) 
+# angle <- 360 * (seq_len(n) - 1) / n 
+# V(g)$label.degree <- angle * pi / 180 
+# V(g)$label.dist <- 1.75 
+# V(g)$label.cex <- .75
+# arrow_sizes <- ifelse(E(g)$type == "undirected", 0, 0.2)
+# plot(g, 
+#      layout = lay, 
+#      vertex.label = V(g)$name, 
+#      vertex.label.color = "black",
+#      edge.color = ifelse(E(g)$type == "directed", "black", NA),
+#      edge.width = E(g)$width,
+#      edge.arrow.size = 1,
+#      asp = 1, margin = -.1, 
+#      vertex.label.degree=lab.locs)
+# 
+# undirected_edges <- E(g)[E(g)$type == "undirected"]
+# for(e in undirected_edges) {
+#   from <- ends(g, e)[1]
+#   to   <- ends(g, e)[2]
+#   segments(
+#     lay[which(V(g)$name == from), 1], lay[which(V(g)$name == from), 2],
+#     lay[which(V(g)$name == to), 1],   lay[which(V(g)$name == to), 2],
+#     col = "DodgerBlue", lwd = 1
+#   )
+# }
+# title("Estimated Single-cell GRN")
