@@ -39,7 +39,7 @@ helperFuncMixed.R contains the individual functions used in main.R
 
 # Example Usage
 
-Download test_data.RData, which contains a dataset with $n = 100$ observations and $p = 100$ variables.
+Download test_data.RData, which contains a dataset with $n = 100$ observations and $p = 100$ variables. The example block structure suggests every 5 units are dependent. (Obs. 1 - 5, Obs. 6 - 10, etc. are dependent)
 
 ```r
 load("test_data.RData")
@@ -48,11 +48,14 @@ test_decor = mixed_data_decor(test_data, block_sizes = rep(5,20))
 
 ---
 
-# Output
+**Output**
+
 The function returns a list with two elements:
 
-Element 1: 
-A list of de-correlated datasets generated during the iterative algorithm. These datasets can be used for the consensus approach.
-Element 2: 
-The average of de-correlated datasets, which can be used for the average approach.
+- **Element 1:**  
+  A list of de-correlated datasets generated during the iterative algorithm.  
+  These datasets can be used for the consensus approach.
+
+- **Element 2:**  
+  The average of the de-correlated datasets, which can be used for the average approach.
 
