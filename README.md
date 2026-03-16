@@ -17,6 +17,19 @@ The main function:
 mixed_data_decor(data, block_sizes)
 ```
 
+Primary functions used within **mixed_data_decor** from helperFuncMixed.R
+- **EM_tau_beta_mixed:**  
+  Pre-estimation of thresholds T and coefficients $\beta$.
+
+- **Sig_Estimate_DAG_mixed:**  
+  Pre-estimation of row-covariance Sigma.
+
+- **epsilon_draw_mixed:**  
+  Draws of epsilon subject to estimated thresholds.
+
+- **obtain_hidden_Z_mixed:**  
+  Recovery of latent Z for discrete variables.
+
 A user need only input the dataset and block sizes among the units of the data. For example, if you have a dataset with $n = 20$ observations and every 5 units are dependent,
 ```r
 block_sizes = c(5,5,5,5)
@@ -39,7 +52,7 @@ helperFuncMixed.R contains the individual functions used in main.R
 
 ## Example Usage
 
-Download test_data.RData, which contains a dataset with $n = 100$ observations and $p = 100$ variables. The example block structure suggests every 5 units are dependent. (Obs. 1 - 5, Obs. 6 - 10, etc. are dependent)
+Download **test_data.RData**, which contains a mixed variable dataset with $n = 100$ observations and $p = 100$ variables. The example block structure suggests every 5 units are dependent. (Obs. 1 - 5, Obs. 6 - 10, etc. are dependent)
 
 ```r
 load("test_data.RData")
