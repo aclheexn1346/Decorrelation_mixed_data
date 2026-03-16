@@ -1,4 +1,4 @@
-## Mixed Data De-correlation Methodology
+## Mixed data de-correlation methodology
 
 This repository implements a **de-correlation methodology for mixed data (continuous and discrete variables)**. The goal of the procedure is to transform correlated observations into approximately **independent latent variables**, which can then be used in downstream tasks such as causal discovery.
 
@@ -37,7 +37,7 @@ block_sizes = c(5,5,5,5)
 
 ---
 
-## Required Files
+## Required files
 
 Ensure that the packages are installed within `libraries.R`
 
@@ -50,7 +50,7 @@ source("helperFuncMixed.R")
 
 ---
 
-## Example Usage
+## Example usage
 
 Download `test_data.RData`, which contains a mixed variable dataset with $n = 100$ observations and $p = 100$ variables. The example block structure suggests every 5 units are dependent. (Obs. 1 - 5, Obs. 6 - 10, etc. are dependent)
 
@@ -74,7 +74,7 @@ The function returns a list with two elements:
 
 ---
 
-## Single-cell RNA-seq Data Experiments
+## Single-cell RNA-seq data for GRN estimation
 
 The code for the single-cell experiments is located in:
 
