@@ -36,7 +36,7 @@ A user need only input the dataset and block sizes among the units of the data. 
 block_sizes = c(5,5,5,5)
 ```
 
-The algorithm will detect the discrete columns if the number of levels in the discrete variables is $< 5$. If there are more, please input the discrete columns as a vector of 1's and 0's of the same length as the number of total variables (1 corresponds to a discrete variable, 0 corresponds to a continuous variable). For example, if there are 5 total variables where column 1 and 4 are discrete variables, the discColumns argument should be:
+The algorithm will detect the discrete columns if the number of levels in the discrete variables is < 5. If there are more, please input the discrete columns as a vector of 1's and 0's of the same length as the number of total variables (1 corresponds to a discrete variable, 0 corresponds to a continuous variable). For example, if there are 5 total variables where column 1 and 4 are discrete variables, the discColumns argument should be:
 
 ```r
 discColumns = c(1,0,0,1,0)
