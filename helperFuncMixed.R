@@ -393,22 +393,18 @@ EM_tau_beta_mixed = function(data, parent_set, discColumns, reps){
   for(i in 1:reps){
     #print(i)
     # update beta given tau
-    # From here Feb 1 5pm
     update_beta = EM_beta_given_tau_mixed(data, init_beta, init_tau, discCols = discColumns, reps = 5)
     beta_estimates[[i+1]] = update_beta[[1]]
     beta_diffs[[i]] = update_beta[[2]]
     # update tau given beta
     update_tau = vector("list", ncol(data))
     
-    # work on this one for discrete data
-    # feb 2
-    
     for(j in 1:p){
       #print(j)
       if (i == 1){
         store_likelihood[i,j] = tau_likelihood_func_mixed(diff(c(0, init_tau[[j]])), data = data, beta = update_beta[[1]], discCols = discColumns, variable = j)
       }
-      #tryCatch({
+
       # Generate data using the current vers value
       if(discColumns[j] == 1){
         if(length(unique(data[,j])) != 3){
@@ -461,11 +457,8 @@ get_bounds <- function(observed, thresholds) {
   }
   return(c(lower_bound, upper_bound))
 }
-# need to adjust trunc_vals so that I'm taking in the list of estimated tau
-# then imagine it is cut up into 9 regions such that 2,2 is the top right region and etc. then
-# get log likelihood from that
+
 Sig_Estimate_DAG_mixed = function(X, trunc_vals, block_sizes, discCols){
-  # From here feb 3
   data = X
   t_data = t(data)
   cluster_number = length(block_sizes)
@@ -484,9 +477,6 @@ Sig_Estimate_DAG_mixed = function(X, trunc_vals, block_sizes, discCols){
       col2 = indices+num_pairs[i,2]
       cols = c(col1,col2)
       pair_data = t_data[,cols]
-      # c1_run = c_sim[(sum(block_sizes[-(j:cluster_number)]))+num_pairs[i,1],]
-      # c2_run = c_sim[(sum(block_sizes[-(j:cluster_number)]))+num_pairs[i,2],]
-
       c1_run = mapply(get_bounds, t_data[,col1], trunc_vals, SIMPLIFY = FALSE)
       c2_run = mapply(get_bounds, t_data[,col2], trunc_vals, SIMPLIFY = FALSE)
 
@@ -523,7 +513,6 @@ beta_est_loop = function(data, init_beta, init_epsilon ,block_sizes, loops, true
   update_betas = list()
   for(i in 1:loops){
     trunc_vals = obtain_trunc_vals(data, update_beta)
-    #print(summary(c(update_beta)))
     if(i == 2){
       estimated_Sigma = Sig_Estimate_DAG(X = data, trunc_vals = trunc_vals, block_sizes = block_sizes)
       if(is.positive.definite(estimated_Sigma) == F){
