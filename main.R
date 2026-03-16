@@ -1,12 +1,18 @@
 source("libraries.R")
 source("helperFuncMixed.R")
 
-mixed_data_decor = function(data, block_sizes){
-  # Identify discrete columns if fewer that 5 levels in a row
-  discColumns = numeric(ncol(data))
-  for(k in 1:ncol(data)){
-    if(length(unique(data[,k])) < 5){
-      discColumns[k] = 1
+mixed_data_decor = function(data, block_sizes, discColumns = NULL){
+  # Detect discrete columns if user does not provide them
+  if(is.null(discColumns)){
+    discColumns = numeric(ncol(data))
+    for(k in 1:ncol(data)){
+      if(length(unique(data[,k])) < 5){
+        discColumns[k] = 1
+      }
+    }
+  } else {
+    if(length(discColumns) != ncol(data)){
+      stop("Length of discColumns must equal number of columns in data")
     }
   }
   
@@ -71,7 +77,7 @@ mixed_data_decor = function(data, block_sizes){
       return(NULL)
     }
     
-    # Recovery of latent Z for discret variables
+    # Recovery of latent Z for discrete variables
     Z = obtain_hidden_Z_mixed(X = data, beta = update_beta, epsilon = eps_draw, discCols = discColumns)
     
     # De-correlate data with estimated covariance
