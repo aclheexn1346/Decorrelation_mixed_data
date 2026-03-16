@@ -30,9 +30,16 @@ Primary functions used within **mixed_data_decor** from `helperFuncMixed.R`
 - **obtain_hidden_Z_mixed:**  
   Recovery of latent Z for discrete variables.
 
-A user need only input the dataset and block sizes among the units of the data. For example, if you have a dataset with $n = 20$ observations and every 5 units are dependent,
+A user need only input the dataset and block sizes among the units of the data. For example, if you have a dataset with $n = 20$ observations and every 5 units are dependent, the block_sizes argument should be:
+
 ```r
 block_sizes = c(5,5,5,5)
+```
+
+The algorithm will detect the discrete columns if the number of levels in the discrete variables is $< 5$. If there are more, please input the discrete columns as a vector of 1's and 0's of the same length as the number of total variables (1 corresponds to a discrete variable, 0 corresponds to a continuous variable). For example, if there are 5 total variables where column 1 and 4 are discrete variables, the discColumns argument should be:
+
+```r
+discColumns = c(1,0,0,1,0)
 ```
 
 ---
