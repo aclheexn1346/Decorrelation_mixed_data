@@ -2,7 +2,7 @@
 
 This repository implements a **de-correlation methodology for mixed data (continuous and discrete variables)**. The goal of the procedure is to transform correlated observations into approximately **independent latent variables**, which can then be used in downstream tasks such as causal discovery.
 
-The main implementation is contained in: main.R
+The main implementation is contained in: `main.R`
 
 
 ---
@@ -17,7 +17,7 @@ The main function:
 mixed_data_decor(data, block_sizes)
 ```
 
-Primary functions used within **mixed_data_decor** from helperFuncMixed.R
+Primary functions used within **mixed_data_decor** from `helperFuncMixed.R`
 - **EM_tau_beta_mixed:**  
   Pre-estimation of thresholds T and coefficients $\beta$.
 
@@ -39,20 +39,20 @@ block_sizes = c(5,5,5,5)
 
 ## Required Files
 
-Ensure that the packages are installed within libraries.R
+Ensure that the packages are installed within `libraries.R`
 
 ```r
 source("libraries.R")
 source("helperFuncMixed.R")
 ```
 
-helperFuncMixed.R contains the individual functions used in main.R
+`helperFuncMixed.R` contains the individual functions used in `main.R`
 
 ---
 
 ## Example Usage
 
-Download **test_data.RData**, which contains a mixed variable dataset with $n = 100$ observations and $p = 100$ variables. The example block structure suggests every 5 units are dependent. (Obs. 1 - 5, Obs. 6 - 10, etc. are dependent)
+Download `test_data.RData`, which contains a mixed variable dataset with $n = 100$ observations and $p = 100$ variables. The example block structure suggests every 5 units are dependent. (Obs. 1 - 5, Obs. 6 - 10, etc. are dependent)
 
 ```r
 load("test_data.RData")
@@ -71,4 +71,19 @@ The function returns a list with two elements:
 
 - **Element 2:**  
   The average of the de-correlated datasets, which can be used for the average approach.
+
+---
+
+## Single-cell RNA-seq Data Experiments
+
+The code for the single-cell experiments is located in:
+
+- `single_cell_funcs.R`
+- `single_cell_sim_mixed.R`
+
+To reproduce these experiments, users must download the gene expression dataset from:
+
+Chu et al. (2016), *Single-cell RNA-seq reveals novel regulators of human embryonic stem cell differentiation to definitive endoderm*, **Genome Biology**.
+
+DOI: https://doi.org/10.1186/s13059-016-1033-x
 
